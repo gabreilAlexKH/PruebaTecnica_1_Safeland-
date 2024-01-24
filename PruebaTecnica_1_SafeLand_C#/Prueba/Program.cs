@@ -204,7 +204,6 @@ public class Program
             {
 
                 Console.WriteLine("Error al leer archivo");
-                Console.WriteLine(ex);
             }
             finally
             {
