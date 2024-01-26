@@ -17,34 +17,44 @@ public class TableHTML
 
 	public TableHTML(string newFile, List<Gaveta> gavetas)
 	{
-
 		this.newFile = newFile;
 		this.gavetas = gavetas;
 		this.colorConv = colorConverter.getInstance();
 	}
 
-	/**
-	 * Copia el contenido de una template de html
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <returns></returns>
 	public bool copyTemplate()
 	{
-
 		template = new List<String>();
 
-		if (File.Exists(templateDir)) {
-			
+		if (File.Exists(templateDir))
+		{
 			StreamReader reader = new StreamReader(templateDir);
-			String line;
-			while ((line = reader.ReadLine()) != null) {
-				template.Add(line);
+			try
+			{
+				String line;
+				while ((line = reader.ReadLine()) != null)
+				{
+					template.Add(line);
+				}
+
 			}
-			reader.Close();
-			return true;
+			catch (IOException ex)
+			{
+				template.Clear();
+				return false;
+
+			}
+			finally
+			{
+				reader.Close();
+			}
+
 		}
-		return false;
+		return true;
 	}
 
 	public StringBuilder writeGroup(List<Gaveta> gavetas, int length)
@@ -124,7 +134,8 @@ public class TableHTML
 		return jump;
 	}
 
-	public void writeTable() {
+	public void writeTable()
+	{
 
 		StreamWriter writer = new StreamWriter(newFile);
 
@@ -132,37 +143,52 @@ public class TableHTML
 		int rest = size % NCOL;
 		string jump = writeJump(NCOL).ToString();
 
-		if (rest != 0) {
-			for (int i = 0; i < 3 - rest; i += 1) {
+		if (rest != 0)
+		{
+			for (int i = 0; i < 3 - rest; i += 1)
+			{
 				gavetas.Add(new Gaveta("", 0, "", "BLANCA"));
 			}
 		}
-
 		size = gavetas.Count;
-		size = gavetas.Count;
-		for (int i = 0; i < TEMP1; i++) {
-			writer.Write(template[i] + "\n");
-		}
-		
-		writer.Write("<table>\r\n");
-		for (int i = 0; i < size; i += NCOL) {
-			
-			List<Gaveta> rowGaveta = gavetas.GetRange(i, NCOL);
 
-			String group = writeGroup(rowGaveta, rowGaveta.Count).ToString();
-			writer.Write(group);
-
-			if (i + 3 < size) {
-				writer.Write(jump);
+		try
+		{
+			for (int i = 0; i < TEMP1; i++)
+			{
+				writer.Write(template[i] + "\n");
 			}
+
+			writer.Write("<table>\r\n");
+			for (int i = 0; i < size; i += NCOL)
+			{
+
+				List<Gaveta> rowGaveta = gavetas.GetRange(i, NCOL);
+				string group = writeGroup(rowGaveta, rowGaveta.Count).ToString();
+				writer.Write(group);
+				if (i + 3 < size)
+				{
+					writer.Write(jump);
+				}
+			}
+
+			writer.Write("</table>");
+			for (int i = TEMP1; i < template.Count; i++)
+			{
+				writer.Write("\n" + template[i]);
+			}
+			writer.WriteLine();
+		}
+		catch(IOException ex)
+		{
+            throw;
+        }
+		finally
+		{
+			writer.Close();
 		}
 
-		writer.Write("</table>");
-		for (int i = TEMP1; i < template.Count; i++) {
-			writer.Write("\n" + template[i]);
-		}
-		writer.WriteLine();
-		writer.Close();
+		
 	}
 
 

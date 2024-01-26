@@ -5,7 +5,7 @@ public class colorConverter
 {
 
     private static colorConverter instance = null;
-    public Dictionary<string, string> colores = new Dictionary<string, string>();
+    public Dictionary<string, string> colores = null;
     private static String fileName = ".\\files\\color.csv";
 
     /// <summary>
@@ -17,22 +17,35 @@ public class colorConverter
     public colorConverter()
     {
         string fileDir = Path.GetFullPath(fileName);
+        StreamReader reader = new StreamReader(fileName);
+        colores = new Dictionary<string, string>();
 
-        if (File.Exists(fileDir))
+        String line;
+
+        try
         {
-
-            StreamReader reader = new StreamReader(fileName);
-
-            String line;
             while ((line = reader.ReadLine()) != null)
             {
                 String[] values = line.Split(",");
                 colores.Add(values[0], values[1]);
-
             }
+
+        }
+        catch (IOException ex)
+        {
+            colores.Clear();
+            throw ex;
+        }
+        finally
+        {
             reader.Close();
         }
+    }
 
+    public static bool CheckFile()
+    {
+        string fileDir = Path.GetFullPath(fileName);
+        return File.Exists(fileDir);
     }
 
     /// <summary>
@@ -57,7 +70,6 @@ public class colorConverter
     /// <returns>String con Hex code del color enviado</returns>
     public string GetColor(string colorTexto)
     {
-
         string color = ""; ;
         colores.TryGetValue(colorTexto, out color);
         return color;

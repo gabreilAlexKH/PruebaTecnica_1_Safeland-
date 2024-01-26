@@ -80,24 +80,17 @@ public class MySQLCon
 
 	public string getNombreByCodigo(string code)
 	{
-
 		String nombre = "";
-		try
-		{
-			cs.Parameters.AddWithValue("@id", code);
-			var results = cs.ExecuteNonQuery();
-			using (MySqlDataAdapter sda = new MySqlDataAdapter(cs))
-			{
-				DataTable dt = new DataTable();
-				sda.Fill(dt);
-				nombre = dt.Rows[0][0].ToString() ?? "Gris";
-			}
 
-		}
-		catch (Exception e)
+		cs.Parameters.AddWithValue("@id", code);
+		var results = cs.ExecuteNonQuery();
+		using (MySqlDataAdapter sda = new MySqlDataAdapter(cs))
 		{
-			nombre = "Gris";
+			DataTable dt = new DataTable();
+			sda.Fill(dt);
+			nombre = dt.Rows[0][0].ToString() ?? "Gris";
 		}
+		
 		cs.Parameters.Clear();
 
 		return nombre;

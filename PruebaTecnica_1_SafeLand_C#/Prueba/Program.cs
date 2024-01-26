@@ -6,6 +6,11 @@ using clases;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MySql.Data.MySqlClient;
+using System.Text;
+using System.Reflection.Metadata;
+using iTextSharp.text;
+using iTextSharp.text.html.simpleparser;
+using iTextSharp.text.pdf;
 
 public class Program
 {
@@ -84,7 +89,6 @@ public class Program
 
     public static void readDatabase(MySQLCon con, List<Gaveta> gavetas)
     {
-
         List<Gaveta>.Enumerator gavetaEnumerator = gavetas.GetEnumerator();
         while (gavetaEnumerator.MoveNext())
         {
@@ -115,7 +119,6 @@ public class Program
 
         if (File.Exists(file))
         {
-
             var extension = Path.GetExtension(file);
             return extension == ".xlsx";
         }
@@ -125,7 +128,6 @@ public class Program
 
     public static void Main()
     {
-
 
         try
         {
@@ -137,20 +139,24 @@ public class Program
             Console.WriteLine("No se pudo establecer conexion de la base de datos no existe \n");
         }
 
-        try
+        if (colorConverter.CheckFile())
         {
-            colors = colorConverter.getInstance();
+            try
+            {
+                colors = colorConverter.getInstance();
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine("Error al cargar colores");
+            }
+
         }
-        catch (IOException ex)
-        {
-            Console.WriteLine("Error al cargar colores");
-        }
+
 
         if (colors != null && con != null)
         {
             Console.WriteLine("INGRESE RUTA DEL ARCHIVO:");
             string fileName = Console.ReadLine().Trim();
-
 
 
             try
@@ -170,7 +176,6 @@ public class Program
                     readFile(file, gavetas);
                     file.Close();
                     readDatabase(con, gavetas);
-                    con.closeConection();
 
                     Console.WriteLine("\nIMPIMIENDO INVENTARIO");
                     printInventario(gavetas);
@@ -178,17 +183,18 @@ public class Program
 
                     // Generar HTML
                     Console.WriteLine("\nQUIERE IMPRIMIR? Y/N");
-                    String conf = Console.ReadLine().ToUpper();
+                    string conf = Console.ReadLine().ToUpper();
 
                     if (conf.Equals("Y"))
                     {
-
                         TableHTML tableGenerator = new TableHTML(fileHTLM, gavetas);
                         tableGenerator.copyTemplate();
                         tableGenerator.writeTable();
 
                         string path = Path.GetFullPath(fileHTLM);
                         Console.WriteLine($"html guardado en : {path} \n");
+
+
                     }
 
 
@@ -203,10 +209,11 @@ public class Program
             catch (Exception ex)
             {
 
-                Console.WriteLine("Error al leer archivo");
+                Console.WriteLine("Error al leer archivo de entrada");
             }
             finally
             {
+                con.closeConection();
 
             }
         }
